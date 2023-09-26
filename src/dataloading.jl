@@ -1,4 +1,4 @@
-using DataFrames, CSV, Random, Decimals
+using DataFrames, CSV, Random, Decimals, Printf
 
 function load_data(file)
     types = [Int, String, String, String, String, Amount, Amount]
@@ -24,12 +24,18 @@ function Base.tryparse(::Type{Amount}, s::String)
     try
         amount, currency = split(s)
         if currency != "€"
-            warn("Currency $currency not supported")
+            @warn("Currency $currency not supported")
         end
         amount = replace(amount, ',' => '.')
         return Amount(parse(Decimal, amount))
     catch
-        warn("Could not parse $s as Amount")
+        @warn("Could not parse $s as Amount")
         return nothing
     end
+end
+
+function Base.show(io::IO, amount::Amount)
+    @sprintf("%.2f €", amount.amount) |>
+        x -> replace(x, "." => ",") |>
+        x -> print(io, x)
 end
