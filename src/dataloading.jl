@@ -1,6 +1,6 @@
 using DataFrames, CSV, Random, Decimals
 
-function load_data(file::String)
+function load_data(file)
     types = [Int, String, String, String, String, Amount, Amount]
     data = CSV.File(file; types, strict=true) |> DataFrame
     return data

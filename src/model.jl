@@ -37,3 +37,15 @@ function test_model(m, test)
     end
     return correct / nrow(test)
 end
+
+function assign_accounts!(m, data)
+    for row in eachrow(data)
+        prediction = predict(m, row.description)
+        probability, account = findmax(last, prediction)
+        if probability > 0.85
+            row.account = account
+        else
+            row.account = "TODO"
+        end
+    end
+end
