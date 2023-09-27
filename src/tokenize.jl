@@ -1,4 +1,8 @@
 using WordTokenizers
+using UUIDs
+
+const minus_uuid = uuid4() |> string
+const plus_uuid = uuid4() |> string
 
 regexmatch(r) = s -> match(r, s) |> !isnothing
 
@@ -28,4 +32,22 @@ function tokenize_verwendungszweck(text)
         regexremove(r"[-_.:]+$") |>
         tokens -> vcat(split.(tokens, '-')...) |>
         add_adjacent_merged_words
+end
+
+function tokenize_amount(amount)
+    # TODO maybe add tokens for bins?
+    [ ifelse(amount.amount < 0, minus_uuid, plus_uuid) ]
+end
+
+function generate_tokens(row)
+    vcat(tokenize_verwendungszweck(row.description), tokenize_amount(row.amount))
+end
+
+function get_features(m, row)
+    tokens = generate_tokens(row)
+    fs = TextAnalysis.frequencies(tokens)
+    for k in keys(fs)
+        k in m.dict || TextAnalysis.extend!(m, k)
+    end
+    TextAnalysis.features(fs, m.dict)
 end
